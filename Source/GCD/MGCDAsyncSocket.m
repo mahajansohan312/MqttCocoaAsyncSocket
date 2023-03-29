@@ -55,10 +55,10 @@
 #define LogObjc(flg, frmt, ...) LOG_OBJC_MAYBE(LogAsync, logLevel, flg, LogContext, frmt, ##__VA_ARGS__)
 #define LogC(flg, frmt, ...)    LOG_C_MAYBE(LogAsync, logLevel, flg, LogContext, frmt, ##__VA_ARGS__)
 
-#define LogError(frmt, ...)     LogObjc(LOG_FLAG_ERROR,   (@"%@: " frmt), THIS_FILE, ##__VA_ARGS__)
-#define LogWarn(frmt, ...)      LogObjc(LOG_FLAG_WARN,    (@"%@: " frmt), THIS_FILE, ##__VA_ARGS__)
-#define LogInfo(frmt, ...)      LogObjc(LOG_FLAG_INFO,    (@"%@: " frmt), THIS_FILE, ##__VA_ARGS__)
-#define LogVerbose(frmt, ...)   LogObjc(LOG_FLAG_VERBOSE, (@"%@: " frmt), THIS_FILE, ##__VA_ARGS__)
+#define NSLog(frmt, ...)     LogObjc(LOG_FLAG_ERROR,   (@"%@: " frmt), THIS_FILE, ##__VA_ARGS__)
+#define NSLog(frmt, ...)      LogObjc(LOG_FLAG_WARN,    (@"%@: " frmt), THIS_FILE, ##__VA_ARGS__)
+#define NSLog(frmt, ...)      LogObjc(LOG_FLAG_INFO,    (@"%@: " frmt), THIS_FILE, ##__VA_ARGS__)
+#define NSLog(frmt, ...)   LogObjc(LOG_FLAG_VERBOSE, (@"%@: " frmt), THIS_FILE, ##__VA_ARGS__)
 
 #define LogCError(frmt, ...)    LogC(LOG_FLAG_ERROR,   (@"%@: " frmt), THIS_FILE, ##__VA_ARGS__)
 #define LogCWarn(frmt, ...)     LogC(LOG_FLAG_WARN,    (@"%@: " frmt), THIS_FILE, ##__VA_ARGS__)
@@ -79,10 +79,10 @@ static const int logLevel = MGCDAsyncSocketLogLevel;
 
 // Logging Disabled
 
-#define LogError(frmt, ...)     {}
-#define LogWarn(frmt, ...)      {}
-#define LogInfo(frmt, ...)      {}
-#define LogVerbose(frmt, ...)   {}
+#define NSLog(frmt, ...)     {}
+#define NSLog(frmt, ...)      {}
+#define NSLog(frmt, ...)      {}
+#define NSLog(frmt, ...)   {}
 
 #define LogCError(frmt, ...)    {}
 #define LogCWarn(frmt, ...)     {}
@@ -1032,7 +1032,7 @@ enum MGCDAsyncSocketConfig
 
 - (void)dealloc
 {
-	LogInfo(@"%@ - %@ (start)", THIS_METHOD, self);
+	NSLog(@"%@ - %@ (start)", THIS_METHOD, self);
 	
 	// Set dealloc flag.
 	// This is used by closeWithError to ensure we don't accidentally retain ourself.
@@ -1061,7 +1061,7 @@ enum MGCDAsyncSocketConfig
 	#endif
 	socketQueue = NULL;
 	
-	LogInfo(@"%@ - %@ (finish)", THIS_METHOD, self);
+	NSLog(@"%@ - %@ (finish)", THIS_METHOD, self);
 }
 
 #pragma mark -
@@ -1500,7 +1500,7 @@ enum MGCDAsyncSocketConfig
 			NSString *reason = @"Error enabling non-blocking IO on socket (fcntl)";
 			err = [self errorWithErrno:errno reason:reason];
 			
-			LogVerbose(@"close(socketFD)");
+			NSLog(@"close(socketFD)");
 			close(socketFD);
 			return SOCKET_NULL;
 		}
@@ -1512,7 +1512,7 @@ enum MGCDAsyncSocketConfig
 			NSString *reason = @"Error enabling address reuse (setsockopt)";
 			err = [self errorWithErrno:errno reason:reason];
 			
-			LogVerbose(@"close(socketFD)");
+			NSLog(@"close(socketFD)");
 			close(socketFD);
 			return SOCKET_NULL;
 		}
@@ -1525,7 +1525,7 @@ enum MGCDAsyncSocketConfig
 			NSString *reason = @"Error in bind() function";
 			err = [self errorWithErrno:errno reason:reason];
 			
-			LogVerbose(@"close(socketFD)");
+			NSLog(@"close(socketFD)");
 			close(socketFD);
 			return SOCKET_NULL;
 		}
@@ -1538,7 +1538,7 @@ enum MGCDAsyncSocketConfig
 			NSString *reason = @"Error in listen() function";
 			err = [self errorWithErrno:errno reason:reason];
 			
-			LogVerbose(@"close(socketFD)");
+			NSLog(@"close(socketFD)");
 			close(socketFD);
 			return SOCKET_NULL;
 		}
@@ -1627,7 +1627,7 @@ enum MGCDAsyncSocketConfig
 		
 		if (enableIPv4)
 		{
-			LogVerbose(@"Creating IPv4 socket");
+			NSLog(@"Creating IPv4 socket");
             self->socket4FD = createSocket(AF_INET, interface4);
 			
             if (self->socket4FD == SOCKET_NULL)
@@ -1638,7 +1638,7 @@ enum MGCDAsyncSocketConfig
 		
 		if (enableIPv6)
 		{
-			LogVerbose(@"Creating IPv6 socket");
+			NSLog(@"Creating IPv6 socket");
 			
 			if (enableIPv4 && (port == 0))
 			{
@@ -1655,7 +1655,7 @@ enum MGCDAsyncSocketConfig
 			{
                 if (self->socket4FD != SOCKET_NULL)
 				{
-					LogVerbose(@"close(socket4FD)");
+					NSLog(@"close(socket4FD)");
                     close(self->socket4FD);
                     self->socket4FD = SOCKET_NULL;
 				}
@@ -1682,12 +1682,12 @@ enum MGCDAsyncSocketConfig
 				__strong MGCDAsyncSocket *strongSelf = weakSelf;
 				if (strongSelf == nil) return_from_block;
 				
-				LogVerbose(@"event4Block");
+				NSLog(@"event4Block");
 				
 				unsigned long i = 0;
 				unsigned long numPendingConnections = dispatch_source_get_data(acceptSource);
 				
-				LogVerbose(@"numPendingConnections: %lu", numPendingConnections);
+				NSLog(@"numPendingConnections: %lu", numPendingConnections);
 				
 				while ([strongSelf doAccept:socketFD] && (++i < numPendingConnections));
 				
@@ -1700,17 +1700,17 @@ enum MGCDAsyncSocketConfig
 			#pragma clang diagnostic warning "-Wimplicit-retain-self"
 				
 				#if !OS_OBJECT_USE_OBJC
-				LogVerbose(@"dispatch_release(accept4Source)");
+				NSLog(@"dispatch_release(accept4Source)");
 				dispatch_release(acceptSource);
 				#endif
 				
-				LogVerbose(@"close(socket4FD)");
+				NSLog(@"close(socket4FD)");
 				close(socketFD);
 			
 			#pragma clang diagnostic pop
 			});
 			
-			LogVerbose(@"dispatch_resume(accept4Source)");
+			NSLog(@"dispatch_resume(accept4Source)");
             dispatch_resume(self->accept4Source);
 		}
 		
@@ -1730,12 +1730,12 @@ enum MGCDAsyncSocketConfig
 				__strong MGCDAsyncSocket *strongSelf = weakSelf;
 				if (strongSelf == nil) return_from_block;
 				
-				LogVerbose(@"event6Block");
+				NSLog(@"event6Block");
 				
 				unsigned long i = 0;
 				unsigned long numPendingConnections = dispatch_source_get_data(acceptSource);
 				
-				LogVerbose(@"numPendingConnections: %lu", numPendingConnections);
+				NSLog(@"numPendingConnections: %lu", numPendingConnections);
 				
 				while ([strongSelf doAccept:socketFD] && (++i < numPendingConnections));
 				
@@ -1747,17 +1747,17 @@ enum MGCDAsyncSocketConfig
 			#pragma clang diagnostic warning "-Wimplicit-retain-self"
 				
 				#if !OS_OBJECT_USE_OBJC
-				LogVerbose(@"dispatch_release(accept6Source)");
+				NSLog(@"dispatch_release(accept6Source)");
 				dispatch_release(acceptSource);
 				#endif
 				
-				LogVerbose(@"close(socket6FD)");
+				NSLog(@"close(socket6FD)");
 				close(socketFD);
 				
 			#pragma clang diagnostic pop
 			});
 			
-			LogVerbose(@"dispatch_resume(accept6Source)");
+			NSLog(@"dispatch_resume(accept6Source)");
             dispatch_resume(self->accept6Source);
 		}
 		
@@ -1773,7 +1773,7 @@ enum MGCDAsyncSocketConfig
 	
 	if (result == NO)
 	{
-		LogInfo(@"Error in accept: %@", err);
+		NSLog(@"Error in accept: %@", err);
 		
 		if (errPtr)
 			*errPtr = err;
@@ -1814,7 +1814,7 @@ enum MGCDAsyncSocketConfig
 			NSString *reason = @"Error enabling non-blocking IO on socket (fcntl)";
 			err = [self errorWithErrno:errno reason:reason];
 			
-			LogVerbose(@"close(socketFD)");
+			NSLog(@"close(socketFD)");
 			close(socketFD);
 			return SOCKET_NULL;
 		}
@@ -1826,7 +1826,7 @@ enum MGCDAsyncSocketConfig
 			NSString *reason = @"Error enabling address reuse (setsockopt)";
 			err = [self errorWithErrno:errno reason:reason];
 			
-			LogVerbose(@"close(socketFD)");
+			NSLog(@"close(socketFD)");
 			close(socketFD);
 			return SOCKET_NULL;
 		}
@@ -1839,7 +1839,7 @@ enum MGCDAsyncSocketConfig
 			NSString *reason = @"Error in bind() function";
 			err = [self errorWithErrno:errno reason:reason];
 			
-			LogVerbose(@"close(socketFD)");
+			NSLog(@"close(socketFD)");
 			close(socketFD);
 			return SOCKET_NULL;
 		}
@@ -1852,7 +1852,7 @@ enum MGCDAsyncSocketConfig
 			NSString *reason = @"Error in listen() function";
 			err = [self errorWithErrno:errno reason:reason];
 			
-			LogVerbose(@"close(socketFD)");
+			NSLog(@"close(socketFD)");
 			close(socketFD);
 			return SOCKET_NULL;
 		}
@@ -1920,7 +1920,7 @@ enum MGCDAsyncSocketConfig
 		
 		// Create sockets, configure, bind, and listen
 		
-		LogVerbose(@"Creating unix domain socket");
+		NSLog(@"Creating unix domain socket");
         self->socketUN = createSocket(AF_UNIX, interface);
 		
         if (self->socketUN == SOCKET_NULL)
@@ -1943,12 +1943,12 @@ enum MGCDAsyncSocketConfig
 			
 			__strong MGCDAsyncSocket *strongSelf = weakSelf;
 			
-			LogVerbose(@"eventUNBlock");
+			NSLog(@"eventUNBlock");
 			
 			unsigned long i = 0;
 			unsigned long numPendingConnections = dispatch_source_get_data(acceptSource);
 			
-			LogVerbose(@"numPendingConnections: %lu", numPendingConnections);
+			NSLog(@"numPendingConnections: %lu", numPendingConnections);
 			
 			while ([strongSelf doAccept:socketFD] && (++i < numPendingConnections));
 		}});
@@ -1956,15 +1956,15 @@ enum MGCDAsyncSocketConfig
         dispatch_source_set_cancel_handler(self->acceptUNSource, ^{
 			
 #if !OS_OBJECT_USE_OBJC
-			LogVerbose(@"dispatch_release(acceptUNSource)");
+			NSLog(@"dispatch_release(acceptUNSource)");
 			dispatch_release(acceptSource);
 #endif
 			
-			LogVerbose(@"close(socketUN)");
+			NSLog(@"close(socketUN)");
 			close(socketFD);
 		});
 		
-		LogVerbose(@"dispatch_resume(acceptUNSource)");
+		NSLog(@"dispatch_resume(acceptUNSource)");
         dispatch_resume(self->acceptUNSource);
 		
         self->flags |= kSocketStarted;
@@ -1979,7 +1979,7 @@ enum MGCDAsyncSocketConfig
 	
 	if (result == NO)
 	{
-		LogInfo(@"Error in accept: %@", err);
+		NSLog(@"Error in accept: %@", err);
 		
 		if (errPtr)
 			*errPtr = err;
@@ -2007,7 +2007,7 @@ enum MGCDAsyncSocketConfig
 		
 		if (childSocketFD == -1)
 		{
-			LogWarn(@"Accept failed with error: %@", [self errnoError]);
+			NSLog(@"Accept failed with error: %@", [self errnoError]);
 			return NO;
 		}
 		
@@ -2024,7 +2024,7 @@ enum MGCDAsyncSocketConfig
 		
 		if (childSocketFD == -1)
 		{
-			LogWarn(@"Accept failed with error: %@", [self errnoError]);
+			NSLog(@"Accept failed with error: %@", [self errnoError]);
 			return NO;
 		}
 		
@@ -2041,7 +2041,7 @@ enum MGCDAsyncSocketConfig
 		
 		if (childSocketFD == -1)
 		{
-			LogWarn(@"Accept failed with error: %@", [self errnoError]);
+			NSLog(@"Accept failed with error: %@", [self errnoError]);
 			return NO;
 		}
 		
@@ -2053,8 +2053,8 @@ enum MGCDAsyncSocketConfig
 	int result = fcntl(childSocketFD, F_SETFL, O_NONBLOCK);
 	if (result == -1)
 	{
-		LogWarn(@"Error enabling non-blocking IO on accepted socket (fcntl)");
-		LogVerbose(@"close(childSocketFD)");
+		NSLog(@"Error enabling non-blocking IO on accepted socket (fcntl)");
+		NSLog(@"close(childSocketFD)");
 		close(childSocketFD);
 		return NO;
 	}
@@ -2335,7 +2335,7 @@ enum MGCDAsyncSocketConfig
 		
         self->flags |= kSocketStarted;
 		
-		LogVerbose(@"Dispatching DNS lookup...");
+		NSLog(@"Dispatching DNS lookup...");
 		
 		// It's possible that the given host parameter is actually a NSMutableString.
 		// So we want to copy it now, within this block that will be executed synchronously.
@@ -2603,7 +2603,7 @@ enum MGCDAsyncSocketConfig
 	
 	if (aStateIndex != stateIndex)
 	{
-		LogInfo(@"Ignoring lookupDidSucceed, already disconnected");
+		NSLog(@"Ignoring lookupDidSucceed, already disconnected");
 		
 		// The connect operation has been cancelled.
 		// That is, socket was disconnected, or connection has already timed out.
@@ -2657,7 +2657,7 @@ enum MGCDAsyncSocketConfig
 	
 	if (aStateIndex != stateIndex)
 	{
-		LogInfo(@"Ignoring lookup:didFail: - already disconnected");
+		NSLog(@"Ignoring lookup:didFail: - already disconnected");
 		
 		// The connect operation has been cancelled.
 		// That is, socket was disconnected, or connection has already timed out.
@@ -2674,7 +2674,7 @@ enum MGCDAsyncSocketConfig
     
     if (connectInterface)
     {
-        LogVerbose(@"Binding socket...");
+        NSLog(@"Binding socket...");
         
         if ([[self class] portFromAddress:connectInterface] > 0)
         {
@@ -2781,7 +2781,7 @@ enum MGCDAsyncSocketConfig
 #pragma clang diagnostic pop
     });
     
-    LogVerbose(@"Connecting...");
+    NSLog(@"Connecting...");
 }
 
 - (void)closeSocket:(int)socketFD
@@ -2793,12 +2793,12 @@ enum MGCDAsyncSocketConfig
         
         if (socketFD == socket4FD)
         {
-            LogVerbose(@"close(socket4FD)");
+            NSLog(@"close(socket4FD)");
             socket4FD = SOCKET_NULL;
         }
         else if (socketFD == socket6FD)
         {
-            LogVerbose(@"close(socket6FD)");
+            NSLog(@"close(socket6FD)");
             socket6FD = SOCKET_NULL;
         }
     }
@@ -2822,8 +2822,8 @@ enum MGCDAsyncSocketConfig
 	
 	NSAssert(dispatch_get_specific(IsOnSocketQueueOrTargetQueueKey), @"Must be dispatched on socketQueue");
 	
-	LogVerbose(@"IPv4: %@:%hu", [[self class] hostFromAddress:address4], [[self class] portFromAddress:address4]);
-	LogVerbose(@"IPv6: %@:%hu", [[self class] hostFromAddress:address6], [[self class] portFromAddress:address6]);
+	NSLog(@"IPv4: %@:%hu", [[self class] hostFromAddress:address4], [[self class] portFromAddress:address4]);
+	NSLog(@"IPv6: %@:%hu", [[self class] hostFromAddress:address6], [[self class] portFromAddress:address6]);
 	
 	// Determine socket type
 	
@@ -2833,14 +2833,14 @@ enum MGCDAsyncSocketConfig
     
     if (address4)
     {
-        LogVerbose(@"Creating IPv4 socket");
+        NSLog(@"Creating IPv4 socket");
         
         socket4FD = [self createSocket:AF_INET connectInterface:connectInterface4 errPtr:errPtr];
     }
     
     if (address6)
     {
-        LogVerbose(@"Creating IPv6 socket");
+        NSLog(@"Creating IPv6 socket");
         
         socket6FD = [self createSocket:AF_INET6 connectInterface:connectInterface6 errPtr:errPtr];
     }
@@ -2892,7 +2892,7 @@ enum MGCDAsyncSocketConfig
 	
 	int socketFD;
 	
-	LogVerbose(@"Creating unix domain socket");
+	NSLog(@"Creating unix domain socket");
 	
 	socketUN = socket(AF_UNIX, SOCK_STREAM, 0);
 	
@@ -2908,7 +2908,7 @@ enum MGCDAsyncSocketConfig
 	
 	// Bind the socket to the desired interface (if needed)
 	
-	LogVerbose(@"Binding socket...");
+	NSLog(@"Binding socket...");
 	
 	int reuseOn = 1;
 	setsockopt(socketFD, SOL_SOCKET, SO_REUSEADDR, &reuseOn, sizeof(reuseOn));
@@ -2958,7 +2958,7 @@ enum MGCDAsyncSocketConfig
 		}
 	});
 	
-	LogVerbose(@"Connecting...");
+	NSLog(@"Connecting...");
 	
 	return YES;
 }
@@ -2972,7 +2972,7 @@ enum MGCDAsyncSocketConfig
 	
 	if (aStateIndex != stateIndex)
 	{
-		LogInfo(@"Ignoring didConnect, already disconnected");
+		NSLog(@"Ignoring didConnect, already disconnected");
 		
 		// The connect operation has been cancelled.
 		// That is, socket was disconnected, or connection has already timed out.
@@ -3114,7 +3114,7 @@ enum MGCDAsyncSocketConfig
 	
 	if (aStateIndex != stateIndex)
 	{
-		LogInfo(@"Ignoring didNotConnect, already disconnected");
+		NSLog(@"Ignoring didNotConnect, already disconnected");
 		
 		// The connect operation has been cancelled.
 		// That is, socket was disconnected, or connection has already timed out.
@@ -3150,7 +3150,7 @@ enum MGCDAsyncSocketConfig
 		#pragma clang diagnostic push
 		#pragma clang diagnostic warning "-Wimplicit-retain-self"
 			
-			LogVerbose(@"dispatch_release(connectTimer)");
+			NSLog(@"dispatch_release(connectTimer)");
 			dispatch_release(theConnectTimer);
 			
 		#pragma clang diagnostic pop
@@ -3269,25 +3269,25 @@ enum MGCDAsyncSocketConfig
 	
 	if (!accept4Source && !accept6Source && !acceptUNSource && !readSource && !writeSource)
 	{
-		LogVerbose(@"manually closing close");
+		NSLog(@"manually closing close");
 
 		if (socket4FD != SOCKET_NULL)
 		{
-			LogVerbose(@"close(socket4FD)");
+			NSLog(@"close(socket4FD)");
 			close(socket4FD);
 			socket4FD = SOCKET_NULL;
 		}
 
 		if (socket6FD != SOCKET_NULL)
 		{
-			LogVerbose(@"close(socket6FD)");
+			NSLog(@"close(socket6FD)");
 			close(socket6FD);
 			socket6FD = SOCKET_NULL;
 		}
 		
 		if (socketUN != SOCKET_NULL)
 		{
-			LogVerbose(@"close(socketUN)");
+			NSLog(@"close(socketUN)");
 			close(socketUN);
 			socketUN = SOCKET_NULL;
 			unlink(socketUrl.path.fileSystemRepresentation);
@@ -3298,7 +3298,7 @@ enum MGCDAsyncSocketConfig
 	{
 		if (accept4Source)
 		{
-			LogVerbose(@"dispatch_source_cancel(accept4Source)");
+			NSLog(@"dispatch_source_cancel(accept4Source)");
 			dispatch_source_cancel(accept4Source);
 			
 			// We never suspend accept4Source
@@ -3308,7 +3308,7 @@ enum MGCDAsyncSocketConfig
 		
 		if (accept6Source)
 		{
-			LogVerbose(@"dispatch_source_cancel(accept6Source)");
+			NSLog(@"dispatch_source_cancel(accept6Source)");
 			dispatch_source_cancel(accept6Source);
 			
 			// We never suspend accept6Source
@@ -3318,7 +3318,7 @@ enum MGCDAsyncSocketConfig
 		
 		if (acceptUNSource)
 		{
-			LogVerbose(@"dispatch_source_cancel(acceptUNSource)");
+			NSLog(@"dispatch_source_cancel(acceptUNSource)");
 			dispatch_source_cancel(acceptUNSource);
 			
 			// We never suspend acceptUNSource
@@ -3328,7 +3328,7 @@ enum MGCDAsyncSocketConfig
 	
 		if (readSource)
 		{
-			LogVerbose(@"dispatch_source_cancel(readSource)");
+			NSLog(@"dispatch_source_cancel(readSource)");
 			dispatch_source_cancel(readSource);
 			
 			[self resumeReadSource];
@@ -3338,7 +3338,7 @@ enum MGCDAsyncSocketConfig
 		
 		if (writeSource)
 		{
-			LogVerbose(@"dispatch_source_cancel(writeSource)");
+			NSLog(@"dispatch_source_cancel(writeSource)");
 			dispatch_source_cancel(writeSource);
 			
 			[self resumeWriteSource];
@@ -4270,10 +4270,10 @@ enum MGCDAsyncSocketConfig
 		__strong MGCDAsyncSocket *strongSelf = weakSelf;
 		if (strongSelf == nil) return_from_block;
 		
-		LogVerbose(@"readEventBlock");
+		NSLog(@"readEventBlock");
 		
 		strongSelf->socketFDBytesAvailable = dispatch_source_get_data(strongSelf->readSource);
-		LogVerbose(@"socketFDBytesAvailable: %lu", strongSelf->socketFDBytesAvailable);
+		NSLog(@"socketFDBytesAvailable: %lu", strongSelf->socketFDBytesAvailable);
 		
 		if (strongSelf->socketFDBytesAvailable > 0)
 			[strongSelf doReadData];
@@ -4290,7 +4290,7 @@ enum MGCDAsyncSocketConfig
 		__strong MGCDAsyncSocket *strongSelf = weakSelf;
 		if (strongSelf == nil) return_from_block;
 		
-		LogVerbose(@"writeEventBlock");
+		NSLog(@"writeEventBlock");
 		
 		strongSelf->flags |= kSocketCanAcceptBytes;
 		[strongSelf doWriteData];
@@ -4311,16 +4311,16 @@ enum MGCDAsyncSocketConfig
 	#pragma clang diagnostic push
 	#pragma clang diagnostic warning "-Wimplicit-retain-self"
 		
-		LogVerbose(@"readCancelBlock");
+		NSLog(@"readCancelBlock");
 		
 		#if !OS_OBJECT_USE_OBJC
-		LogVerbose(@"dispatch_release(readSource)");
+		NSLog(@"dispatch_release(readSource)");
 		dispatch_release(theReadSource);
 		#endif
 		
 		if (--socketFDRefCount == 0)
 		{
-			LogVerbose(@"close(socketFD)");
+			NSLog(@"close(socketFD)");
 			close(socketFD);
 		}
 		
@@ -4331,16 +4331,16 @@ enum MGCDAsyncSocketConfig
 	#pragma clang diagnostic push
 	#pragma clang diagnostic warning "-Wimplicit-retain-self"
 		
-		LogVerbose(@"writeCancelBlock");
+		NSLog(@"writeCancelBlock");
 		
 		#if !OS_OBJECT_USE_OBJC
-		LogVerbose(@"dispatch_release(writeSource)");
+		NSLog(@"dispatch_release(writeSource)");
 		dispatch_release(theWriteSource);
 		#endif
 		
 		if (--socketFDRefCount == 0)
 		{
-			LogVerbose(@"close(socketFD)");
+			NSLog(@"close(socketFD)");
 			close(socketFD);
 		}
 		
@@ -4353,7 +4353,7 @@ enum MGCDAsyncSocketConfig
 	socketFDBytesAvailable = 0;
 	flags &= ~kReadSourceSuspended;
 	
-	LogVerbose(@"dispatch_resume(readSource)");
+	NSLog(@"dispatch_resume(readSource)");
 	dispatch_resume(readSource);
 	
 	flags |= kSocketCanAcceptBytes;
@@ -4398,7 +4398,7 @@ enum MGCDAsyncSocketConfig
 {
 	if (!(flags & kReadSourceSuspended))
 	{
-		LogVerbose(@"dispatch_suspend(readSource)");
+		NSLog(@"dispatch_suspend(readSource)");
 		
 		dispatch_suspend(readSource);
 		flags |= kReadSourceSuspended;
@@ -4409,7 +4409,7 @@ enum MGCDAsyncSocketConfig
 {
 	if (flags & kReadSourceSuspended)
 	{
-		LogVerbose(@"dispatch_resume(readSource)");
+		NSLog(@"dispatch_resume(readSource)");
 		
 		dispatch_resume(readSource);
 		flags &= ~kReadSourceSuspended;
@@ -4420,7 +4420,7 @@ enum MGCDAsyncSocketConfig
 {
 	if (!(flags & kWriteSourceSuspended))
 	{
-		LogVerbose(@"dispatch_suspend(writeSource)");
+		NSLog(@"dispatch_suspend(writeSource)");
 		
 		dispatch_suspend(writeSource);
 		flags |= kWriteSourceSuspended;
@@ -4431,7 +4431,7 @@ enum MGCDAsyncSocketConfig
 {
 	if (flags & kWriteSourceSuspended)
 	{
-		LogVerbose(@"dispatch_resume(writeSource)");
+		NSLog(@"dispatch_resume(writeSource)");
 		
 		dispatch_resume(writeSource);
 		flags &= ~kWriteSourceSuspended;
@@ -4462,7 +4462,7 @@ enum MGCDAsyncSocketConfig
                         tag:(long)tag
 {
 	if (offset > [buffer length]) {
-		LogWarn(@"Cannot read: offset > [buffer length]");
+		NSLog(@"Cannot read: offset > [buffer length]");
 		return;
 	}
 	
@@ -4501,11 +4501,11 @@ enum MGCDAsyncSocketConfig
                      tag:(long)tag
 {
 	if (length == 0) {
-		LogWarn(@"Cannot read: length == 0");
+		NSLog(@"Cannot read: length == 0");
 		return;
 	}
 	if (offset > [buffer length]) {
-		LogWarn(@"Cannot read: offset > [buffer length]");
+		NSLog(@"Cannot read: offset > [buffer length]");
 		return;
 	}
 	
@@ -4559,15 +4559,15 @@ enum MGCDAsyncSocketConfig
                    tag:(long)tag
 {
 	if ([data length] == 0) {
-		LogWarn(@"Cannot read: [data length] == 0");
+		NSLog(@"Cannot read: [data length] == 0");
 		return;
 	}
 	if (offset > [buffer length]) {
-		LogWarn(@"Cannot read: offset > [buffer length]");
+		NSLog(@"Cannot read: offset > [buffer length]");
 		return;
 	}
 	if (maxLength > 0 && maxLength < [data length]) {
-		LogWarn(@"Cannot read: maxLength > 0 && maxLength < [data length]");
+		NSLog(@"Cannot read: maxLength > 0 && maxLength < [data length]");
 		return;
 	}
 	
@@ -4665,7 +4665,7 @@ enum MGCDAsyncSocketConfig
 			
 			if ([currentRead isKindOfClass:[MGCDAsyncSpecialPacket class]])
 			{
-				LogVerbose(@"Dequeued MGCDAsyncSpecialPacket");
+				NSLog(@"Dequeued MGCDAsyncSpecialPacket");
 				
 				// Attempt to start TLS
 				flags |= kStartingReadTLS;
@@ -4675,7 +4675,7 @@ enum MGCDAsyncSocketConfig
 			}
 			else
 			{
-				LogVerbose(@"Dequeued MGCDAsyncReadPacket");
+				NSLog(@"Dequeued MGCDAsyncReadPacket");
 				
 				// Setup read timer (if needed)
 				[self setupReadTimerWithTimeout:currentRead->timeout];
@@ -4745,7 +4745,7 @@ enum MGCDAsyncSocketConfig
 	{
 		if ((flags & kSecureSocketHasBytesAvailable) && CFReadStreamHasBytesAvailable(readStream))
 		{
-			LogVerbose(@"%@ - Flushing ssl buffers into prebuffer...", THIS_METHOD);
+			NSLog(@"%@ - Flushing ssl buffers into prebuffer...", THIS_METHOD);
 			
 			CFIndex defaultBytesToRead = (1024 * 4);
 			
@@ -4754,7 +4754,7 @@ enum MGCDAsyncSocketConfig
 			uint8_t *buffer = [preBuffer writeBuffer];
 			
 			CFIndex result = CFReadStreamRead(readStream, buffer, defaultBytesToRead);
-			LogVerbose(@"%@ - CFReadStreamRead(): result = %i", THIS_METHOD, (int)result);
+			NSLog(@"%@ - CFReadStreamRead(): result = %i", THIS_METHOD, (int)result);
 			
 			if (result > 0)
 			{
@@ -4795,12 +4795,12 @@ enum MGCDAsyncSocketConfig
 	
 	if (estimatedBytesAvailable > 0)
 	{
-		LogVerbose(@"%@ - Flushing ssl buffers into prebuffer...", THIS_METHOD);
+		NSLog(@"%@ - Flushing ssl buffers into prebuffer...", THIS_METHOD);
 		
 		BOOL done = NO;
 		do
 		{
-			LogVerbose(@"%@ - estimatedBytesAvailable = %lu", THIS_METHOD, (unsigned long)estimatedBytesAvailable);
+			NSLog(@"%@ - estimatedBytesAvailable = %lu", THIS_METHOD, (unsigned long)estimatedBytesAvailable);
 			
 			// Make sure there's enough room in the prebuffer
 			
@@ -4812,14 +4812,14 @@ enum MGCDAsyncSocketConfig
 			size_t bytesRead = 0;
 			
 			OSStatus result = SSLRead(sslContext, buffer, (size_t)estimatedBytesAvailable, &bytesRead);
-			LogVerbose(@"%@ - read from secure socket = %u", THIS_METHOD, (unsigned)bytesRead);
+			NSLog(@"%@ - read from secure socket = %u", THIS_METHOD, (unsigned)bytesRead);
 			
 			if (bytesRead > 0)
 			{
 				[preBuffer didWrite:bytesRead];
 			}
 			
-			LogVerbose(@"%@ - prebuffer.length = %zu", THIS_METHOD, [preBuffer availableBytes]);
+			NSLog(@"%@ - prebuffer.length = %zu", THIS_METHOD, [preBuffer availableBytes]);
 			
 			if (result != noErr)
 			{
@@ -4843,7 +4843,7 @@ enum MGCDAsyncSocketConfig
 	
 	if ((currentRead == nil) || (flags & kReadsPaused))
 	{
-		LogVerbose(@"No currentRead or kReadsPaused");
+		NSLog(@"No currentRead or kReadsPaused");
 		
 		// Unable to read at this time
 		
@@ -4949,7 +4949,7 @@ enum MGCDAsyncSocketConfig
 	
 	if ((hasBytesAvailable == NO) && ([preBuffer availableBytes] == 0))
 	{
-		LogVerbose(@"No data available to read...");
+		NSLog(@"No data available to read...");
 		
 		// No data available to read.
 		
@@ -4965,7 +4965,7 @@ enum MGCDAsyncSocketConfig
 	
 	if (flags & kStartingReadTLS)
 	{
-		LogVerbose(@"Waiting for SSL/TLS handshake to complete");
+		NSLog(@"Waiting for SSL/TLS handshake to complete");
 		
 		// The readQueue is waiting for SSL/TLS handshake to complete.
 		
@@ -5041,7 +5041,7 @@ enum MGCDAsyncSocketConfig
 		// Remove the copied bytes from the preBuffer
 		[preBuffer didRead:bytesToCopy];
 		
-		LogVerbose(@"copied(%lu) preBufferLength(%zu)", (unsigned long)bytesToCopy, [preBuffer availableBytes]);
+		NSLog(@"copied(%lu) preBufferLength(%zu)", (unsigned long)bytesToCopy, [preBuffer availableBytes]);
 		
 		// Update totals
 		
@@ -5137,7 +5137,7 @@ enum MGCDAsyncSocketConfig
 				// Read data into buffer
 				
 				CFIndex result = CFReadStreamRead(readStream, buffer, (CFIndex)bytesToRead);
-				LogVerbose(@"CFReadStreamRead(): result = %i", (int)result);
+				NSLog(@"CFReadStreamRead(): result = %i", (int)result);
 				
 				if (result < 0)
 				{
@@ -5223,7 +5223,7 @@ enum MGCDAsyncSocketConfig
 					size_t loop_bytesRead = 0;
 					
 					result = SSLRead(sslContext, loop_buffer, loop_bytesToRead, &loop_bytesRead);
-					LogVerbose(@"read from secure socket = %u", (unsigned)loop_bytesRead);
+					NSLog(@"read from secure socket = %u", (unsigned)loop_bytesRead);
 					
 					bytesRead += loop_bytesRead;
 					
@@ -5317,7 +5317,7 @@ enum MGCDAsyncSocketConfig
 			int socketFD = (socket4FD != SOCKET_NULL) ? socket4FD : (socket6FD != SOCKET_NULL) ? socket6FD : socketUN;
 			
 			ssize_t result = read(socketFD, buffer, (size_t)bytesToRead);
-			LogVerbose(@"read from socket = %i", (int)result);
+			NSLog(@"read from socket = %i", (int)result);
 			
 			if (result < 0)
 			{
@@ -5385,12 +5385,12 @@ enum MGCDAsyncSocketConfig
 					// We just read a big chunk of data into the preBuffer
 					
 					[preBuffer didWrite:bytesRead];
-					LogVerbose(@"read data into preBuffer - preBuffer.length = %zu", [preBuffer availableBytes]);
+					NSLog(@"read data into preBuffer - preBuffer.length = %zu", [preBuffer availableBytes]);
 					
 					// Search for the terminating sequence
 					
 					NSUInteger bytesToCopy = [currentRead readLengthForTermWithPreBuffer:preBuffer found:&done];
-					LogVerbose(@"copying %lu bytes from preBuffer", (unsigned long)bytesToCopy);
+					NSLog(@"copying %lu bytes from preBuffer", (unsigned long)bytesToCopy);
 					
 					// Ensure there's room on the read packet's buffer
 					
@@ -5405,7 +5405,7 @@ enum MGCDAsyncSocketConfig
 					
 					// Remove the copied bytes from the prebuffer
 					[preBuffer didRead:bytesToCopy];
-					LogVerbose(@"preBuffer.length = %zu", [preBuffer availableBytes]);
+					NSLog(@"preBuffer.length = %zu", [preBuffer availableBytes]);
 					
 					// Update totals
 					currentRead->bytesDone += bytesToCopy;
@@ -5440,14 +5440,14 @@ enum MGCDAsyncSocketConfig
 						
 						// Copy excess data into preBuffer
 						
-						LogVerbose(@"copying %ld overflow bytes into preBuffer", (long)overflow);
+						NSLog(@"copying %ld overflow bytes into preBuffer", (long)overflow);
 						[preBuffer ensureCapacityForWrite:overflow];
 						
 						uint8_t *overflowBuffer = buffer + underflow;
 						memcpy([preBuffer writeBuffer], overflowBuffer, overflow);
 						
 						[preBuffer didWrite:overflow];
-						LogVerbose(@"preBuffer.length = %zu", [preBuffer availableBytes]);
+						NSLog(@"preBuffer.length = %zu", [preBuffer availableBytes]);
 						
 						// Note: The completeCurrentRead method will trim the buffer for us.
 						
@@ -5634,7 +5634,7 @@ enum MGCDAsyncSocketConfig
 	}
 	else if ([preBuffer availableBytes] > 0)
 	{
-		LogVerbose(@"Socket reached EOF, but there is still data available in prebuffer");
+		NSLog(@"Socket reached EOF, but there is still data available in prebuffer");
 		
 		// Although we won't be able to read any more data from the socket,
 		// there is existing data that has been prebuffered that we can read.
@@ -5811,7 +5811,7 @@ enum MGCDAsyncSocketConfig
 		#pragma clang diagnostic push
 		#pragma clang diagnostic warning "-Wimplicit-retain-self"
 			
-			LogVerbose(@"dispatch_release(readTimer)");
+			NSLog(@"dispatch_release(readTimer)");
 			dispatch_release(theReadTimer);
 			
 		#pragma clang diagnostic pop
@@ -5878,7 +5878,7 @@ enum MGCDAsyncSocketConfig
 		}
 		else
 		{
-			LogVerbose(@"ReadTimeout");
+			NSLog(@"ReadTimeout");
 			
 			[self closeWithError:[self readTimeoutError]];
 		}
@@ -5975,7 +5975,7 @@ enum MGCDAsyncSocketConfig
 			
 			if ([currentWrite isKindOfClass:[MGCDAsyncSpecialPacket class]])
 			{
-				LogVerbose(@"Dequeued MGCDAsyncSpecialPacket");
+				NSLog(@"Dequeued MGCDAsyncSpecialPacket");
 				
 				// Attempt to start TLS
 				flags |= kStartingWriteTLS;
@@ -5985,7 +5985,7 @@ enum MGCDAsyncSocketConfig
 			}
 			else
 			{
-				LogVerbose(@"Dequeued MGCDAsyncWritePacket");
+				NSLog(@"Dequeued MGCDAsyncWritePacket");
 				
 				// Setup write timer (if needed)
 				[self setupWriteTimerWithTimeout:currentWrite->timeout];
@@ -6019,7 +6019,7 @@ enum MGCDAsyncSocketConfig
 	
 	if ((currentWrite == nil) || (flags & kWritesPaused))
 	{
-		LogVerbose(@"No currentWrite or kWritesPaused");
+		NSLog(@"No currentWrite or kWritesPaused");
 		
 		// Unable to write at this time
 		
@@ -6043,7 +6043,7 @@ enum MGCDAsyncSocketConfig
 	
 	if (!(flags & kSocketCanAcceptBytes))
 	{
-		LogVerbose(@"No space available to write...");
+		NSLog(@"No space available to write...");
 		
 		// No space available to write.
 		
@@ -6059,7 +6059,7 @@ enum MGCDAsyncSocketConfig
 	
 	if (flags & kStartingWriteTLS)
 	{
-		LogVerbose(@"Waiting for SSL/TLS handshake to complete");
+		NSLog(@"Waiting for SSL/TLS handshake to complete");
 		
 		// The writeQueue is waiting for SSL/TLS handshake to complete.
 		
@@ -6115,7 +6115,7 @@ enum MGCDAsyncSocketConfig
 			}
 		
 			CFIndex result = CFWriteStreamWrite(writeStream, buffer, (CFIndex)bytesToWrite);
-			LogVerbose(@"CFWriteStreamWrite(%lu) = %li", (unsigned long)bytesToWrite, result);
+			NSLog(@"CFWriteStreamWrite(%lu) = %li", (unsigned long)bytesToWrite, result);
 		
 			if (result < 0)
 			{
@@ -6285,7 +6285,7 @@ enum MGCDAsyncSocketConfig
 		}
 		
 		ssize_t result = write(socketFD, buffer, (size_t)bytesToWrite);
-		LogVerbose(@"wrote to socket = %zd", result);
+		NSLog(@"wrote to socket = %zd", result);
 		
 		// Check results
 		if (result < 0)
@@ -6332,7 +6332,7 @@ enum MGCDAsyncSocketConfig
 	{
 		// Update total amount read for the current write
 		currentWrite->bytesDone += bytesWritten;
-		LogVerbose(@"currentWrite->bytesDone = %lu", (unsigned long)currentWrite->bytesDone);
+		NSLog(@"currentWrite->bytesDone = %lu", (unsigned long)currentWrite->bytesDone);
 		
 		// Is packet done?
 		done = (currentWrite->bytesDone == [currentWrite->buffer length]);
@@ -6454,7 +6454,7 @@ enum MGCDAsyncSocketConfig
 		#pragma clang diagnostic push
 		#pragma clang diagnostic warning "-Wimplicit-retain-self"
 			
-			LogVerbose(@"dispatch_release(writeTimer)");
+			NSLog(@"dispatch_release(writeTimer)");
 			dispatch_release(theWriteTimer);
 			
 		#pragma clang diagnostic pop
@@ -6521,7 +6521,7 @@ enum MGCDAsyncSocketConfig
 		}
 		else
 		{
-			LogVerbose(@"WriteTimeout");
+			NSLog(@"WriteTimeout");
 			
 			[self closeWithError:[self writeTimeoutError]];
 		}
@@ -6611,11 +6611,11 @@ enum MGCDAsyncSocketConfig
 
 - (OSStatus)sslReadWithBuffer:(void *)buffer length:(size_t *)bufferLength
 {
-	LogVerbose(@"sslReadWithBuffer:%p length:%lu", buffer, (unsigned long)*bufferLength);
+	NSLog(@"sslReadWithBuffer:%p length:%lu", buffer, (unsigned long)*bufferLength);
 	
 	if ((socketFDBytesAvailable == 0) && ([sslPreBuffer availableBytes] == 0))
 	{
-		LogVerbose(@"%@ - No data available to read...", THIS_METHOD);
+		NSLog(@"%@ - No data available to read...", THIS_METHOD);
 		
 		// No data available to read.
 		// 
@@ -6642,7 +6642,7 @@ enum MGCDAsyncSocketConfig
 	
 	if (sslPreBufferLength > 0)
 	{
-		LogVerbose(@"%@: Reading from SSL pre buffer...", THIS_METHOD);
+		NSLog(@"%@: Reading from SSL pre buffer...", THIS_METHOD);
 		
 		size_t bytesToCopy;
 		if (sslPreBufferLength > totalBytesLeftToBeRead)
@@ -6650,19 +6650,19 @@ enum MGCDAsyncSocketConfig
 		else
 			bytesToCopy = sslPreBufferLength;
 		
-		LogVerbose(@"%@: Copying %zu bytes from sslPreBuffer", THIS_METHOD, bytesToCopy);
+		NSLog(@"%@: Copying %zu bytes from sslPreBuffer", THIS_METHOD, bytesToCopy);
 		
 		memcpy(buffer, [sslPreBuffer readBuffer], bytesToCopy);
 		[sslPreBuffer didRead:bytesToCopy];
 		
-		LogVerbose(@"%@: sslPreBuffer.length = %zu", THIS_METHOD, [sslPreBuffer availableBytes]);
+		NSLog(@"%@: sslPreBuffer.length = %zu", THIS_METHOD, [sslPreBuffer availableBytes]);
 		
 		totalBytesRead += bytesToCopy;
 		totalBytesLeftToBeRead -= bytesToCopy;
 		
 		done = (totalBytesLeftToBeRead == 0);
 		
-		if (done) LogVerbose(@"%@: Complete", THIS_METHOD);
+		if (done) NSLog(@"%@: Complete", THIS_METHOD);
 	}
 	
 	// 
@@ -6671,7 +6671,7 @@ enum MGCDAsyncSocketConfig
 	
 	if (!done && (socketFDBytesAvailable > 0))
 	{
-		LogVerbose(@"%@: Reading from socket...", THIS_METHOD);
+		NSLog(@"%@: Reading from socket...", THIS_METHOD);
 		
 		int socketFD = (socket4FD != SOCKET_NULL) ? socket4FD : (socket6FD != SOCKET_NULL) ? socket6FD : socketUN;
 		
@@ -6684,7 +6684,7 @@ enum MGCDAsyncSocketConfig
 			// Read all available data from socket into sslPreBuffer.
 			// Then copy requested amount into dataBuffer.
 			
-			LogVerbose(@"%@: Reading into sslPreBuffer...", THIS_METHOD);
+			NSLog(@"%@: Reading into sslPreBuffer...", THIS_METHOD);
 			
 			[sslPreBuffer ensureCapacityForWrite:socketFDBytesAvailable];
 			
@@ -6696,7 +6696,7 @@ enum MGCDAsyncSocketConfig
 		{
 			// Read available data from socket directly into dataBuffer.
 			
-			LogVerbose(@"%@: Reading directly into dataBuffer...", THIS_METHOD);
+			NSLog(@"%@: Reading directly into dataBuffer...", THIS_METHOD);
 			
 			readIntoPreBuffer = NO;
 			bytesToRead = totalBytesLeftToBeRead;
@@ -6704,11 +6704,11 @@ enum MGCDAsyncSocketConfig
 		}
 		
 		ssize_t result = read(socketFD, buf, bytesToRead);
-		LogVerbose(@"%@: read from socket = %zd", THIS_METHOD, result);
+		NSLog(@"%@: read from socket = %zd", THIS_METHOD, result);
 		
 		if (result < 0)
 		{
-			LogVerbose(@"%@: read errno = %i", THIS_METHOD, errno);
+			NSLog(@"%@: read errno = %i", THIS_METHOD, errno);
 			
 			if (errno != EWOULDBLOCK)
 			{
@@ -6719,7 +6719,7 @@ enum MGCDAsyncSocketConfig
 		}
 		else if (result == 0)
 		{
-			LogVerbose(@"%@: read EOF", THIS_METHOD);
+			NSLog(@"%@: read EOF", THIS_METHOD);
 			
 			socketError = YES;
 			socketFDBytesAvailable = 0;
@@ -6739,7 +6739,7 @@ enum MGCDAsyncSocketConfig
 				
 				size_t bytesToCopy = MIN(totalBytesLeftToBeRead, bytesReadFromSocket);
 				
-				LogVerbose(@"%@: Copying %zu bytes out of sslPreBuffer", THIS_METHOD, bytesToCopy);
+				NSLog(@"%@: Copying %zu bytes out of sslPreBuffer", THIS_METHOD, bytesToCopy);
 				
 				memcpy((uint8_t *)buffer + totalBytesRead, [sslPreBuffer readBuffer], bytesToCopy);
 				[sslPreBuffer didRead:bytesToCopy];
@@ -6747,7 +6747,7 @@ enum MGCDAsyncSocketConfig
 				totalBytesRead += bytesToCopy;
 				totalBytesLeftToBeRead -= bytesToCopy;
 				
-				LogVerbose(@"%@: sslPreBuffer.length = %zu", THIS_METHOD, [sslPreBuffer availableBytes]);
+				NSLog(@"%@: sslPreBuffer.length = %zu", THIS_METHOD, [sslPreBuffer availableBytes]);
 			}
 			else
 			{
@@ -6757,7 +6757,7 @@ enum MGCDAsyncSocketConfig
 			
 			done = (totalBytesLeftToBeRead == 0);
 			
-			if (done) LogVerbose(@"%@: Complete", THIS_METHOD);
+			if (done) NSLog(@"%@: Complete", THIS_METHOD);
 		}
 	}
 	
@@ -6850,7 +6850,7 @@ static OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, 
 {
 	LogTrace();
 	
-	LogVerbose(@"Starting TLS (via SecureTransport)...");
+	NSLog(@"Starting TLS (via SecureTransport)...");
 	
 	OSStatus status;
 	
@@ -7331,7 +7331,7 @@ static OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, 
 	
 	if (status == noErr)
 	{
-		LogVerbose(@"SSLHandshake complete");
+		NSLog(@"SSLHandshake complete");
 		
 		flags &= ~kStartingReadTLS;
 		flags &= ~kStartingWriteTLS;
@@ -7356,7 +7356,7 @@ static OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, 
 	}
 	else if (status == errSSLPeerAuthCompleted)
 	{
-		LogVerbose(@"SSLHandshake peerAuthCompleted - awaiting delegate approval");
+		NSLog(@"SSLHandshake peerAuthCompleted - awaiting delegate approval");
 		
 		__block SecTrustRef trust = NULL;
 		status = SSLCopyPeerTrust(sslContext, &trust);
@@ -7417,7 +7417,7 @@ static OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, 
 	}
 	else if (status == errSSLWouldBlock)
 	{
-		LogVerbose(@"SSLHandshake continues...");
+		NSLog(@"SSLHandshake continues...");
 		
 		// Handshake continues...
 		// 
@@ -7435,7 +7435,7 @@ static OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, 
 	
 	if (aStateIndex != stateIndex)
 	{
-		LogInfo(@"Ignoring ssl_shouldTrustPeer - invalid state (maybe disconnected)");
+		NSLog(@"Ignoring ssl_shouldTrustPeer - invalid state (maybe disconnected)");
 		
 		// One of the following is true
 		// - the socket was disconnected
@@ -7511,7 +7511,7 @@ static OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, 
 {
 	LogTrace();
 	
-	LogVerbose(@"Starting TLS (via CFStream)...");
+	NSLog(@"Starting TLS (via CFStream)...");
 	
 	if ([preBuffer availableBytes] > 0)
 	{
@@ -7591,7 +7591,7 @@ static OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, 
 		return;
 	}
 	
-	LogVerbose(@"Waiting for SSL Handshake to complete...");
+	NSLog(@"Waiting for SSL Handshake to complete...");
 }
 
 #endif
@@ -7646,7 +7646,7 @@ static OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, 
 		
 		if (cfstreamThreadRetainCount == 0)
 		{
-			LogWarn(@"Logic error concerning cfstreamThread start / stop");
+			NSLog(@"Logic error concerning cfstreamThread start / stop");
 			return_from_block;
 		}
 		
@@ -7671,7 +7671,7 @@ static OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, 
 {
 	[[NSThread currentThread] setName:MGCDAsyncSocketThreadName];
 	
-	LogInfo(@"CFStreamThread: Started");
+	NSLog(@"CFStreamThread: Started");
 	
 	// We can't run the run loop unless it has an associated input source or a timer.
 	// So we'll just create a timer that will never fire - unless the server runs for decades.
@@ -7691,7 +7691,7 @@ static OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, 
 		isCancelled = [currentThread isCancelled];
 	}
 	
-	LogInfo(@"CFStreamThread: Stopped");
+	NSLog(@"CFStreamThread: Stopped");
 }}
 
 + (void)scheduleCFStreams:(MGCDAsyncSocket *)asyncSocket
@@ -7883,7 +7883,7 @@ static void CFWriteStreamCallback (CFWriteStreamRef stream, CFStreamEventType ty
 		return NO;
 	}
 	
-	LogVerbose(@"Creating read and write stream...");
+	NSLog(@"Creating read and write stream...");
 	
 	CFStreamCreatePairWithSocket(NULL, (CFSocketNativeHandle)socketFD, &readStream, &writeStream);
 	
@@ -7897,7 +7897,7 @@ static void CFWriteStreamCallback (CFWriteStreamRef stream, CFStreamEventType ty
 	
 	if ((readStream == NULL) || (writeStream == NULL))
 	{
-		LogWarn(@"Unable to create read and write stream...");
+		NSLog(@"Unable to create read and write stream...");
 		
 		if (readStream)
 		{
@@ -7920,7 +7920,7 @@ static void CFWriteStreamCallback (CFWriteStreamRef stream, CFStreamEventType ty
 
 - (BOOL)registerForStreamCallbacksIncludingReadWrite:(BOOL)includeReadWrite
 {
-	LogVerbose(@"%@ %@", THIS_METHOD, (includeReadWrite ? @"YES" : @"NO"));
+	NSLog(@"%@ %@", THIS_METHOD, (includeReadWrite ? @"YES" : @"NO"));
 	
 	NSAssert(dispatch_get_specific(IsOnSocketQueueOrTargetQueueKey), @"Must be dispatched on socketQueue");
 	NSAssert((readStream != NULL && writeStream != NULL), @"Read/Write stream is null");
@@ -7961,7 +7961,7 @@ static void CFWriteStreamCallback (CFWriteStreamRef stream, CFStreamEventType ty
 	
 	if (!(flags & kAddedStreamsToRunLoop))
 	{
-		LogVerbose(@"Adding streams to runloop...");
+		NSLog(@"Adding streams to runloop...");
 		
 		[[self class] startCFStreamThreadIfNeeded];
         dispatch_sync(cfstreamThreadSetupQueue, ^{
@@ -7985,7 +7985,7 @@ static void CFWriteStreamCallback (CFWriteStreamRef stream, CFStreamEventType ty
 	
 	if (flags & kAddedStreamsToRunLoop)
 	{
-		LogVerbose(@"Removing streams from runloop...");
+		NSLog(@"Removing streams from runloop...");
         
         dispatch_sync(cfstreamThreadSetupQueue, ^{
             [[self class] performSelector:@selector(unscheduleCFStreams:)
@@ -8011,14 +8011,14 @@ static void CFWriteStreamCallback (CFWriteStreamRef stream, CFStreamEventType ty
 	
 	if ((readStatus == kCFStreamStatusNotOpen) || (writeStatus == kCFStreamStatusNotOpen))
 	{
-		LogVerbose(@"Opening read and write stream...");
+		NSLog(@"Opening read and write stream...");
 		
 		BOOL r1 = CFReadStreamOpen(readStream);
 		BOOL r2 = CFWriteStreamOpen(writeStream);
 		
 		if (!r1 || !r2)
 		{
-			LogError(@"Error in CFStreamOpen");
+			NSLog(@"Error in CFStreamOpen");
 			return NO;
 		}
 	}
@@ -8112,7 +8112,7 @@ static void CFWriteStreamCallback (CFWriteStreamRef stream, CFStreamEventType ty
 {
 	if (!dispatch_get_specific(IsOnSocketQueueOrTargetQueueKey))
 	{
-		LogWarn(@"%@ - Method only available from within the context of a performBlock: invocation", THIS_METHOD);
+		NSLog(@"%@ - Method only available from within the context of a performBlock: invocation", THIS_METHOD);
 		return SOCKET_NULL;
 	}
 	
@@ -8129,7 +8129,7 @@ static void CFWriteStreamCallback (CFWriteStreamRef stream, CFStreamEventType ty
 {
 	if (!dispatch_get_specific(IsOnSocketQueueOrTargetQueueKey))
 	{
-		LogWarn(@"%@ - Method only available from within the context of a performBlock: invocation", THIS_METHOD);
+		NSLog(@"%@ - Method only available from within the context of a performBlock: invocation", THIS_METHOD);
 		return SOCKET_NULL;
 	}
 	
@@ -8143,7 +8143,7 @@ static void CFWriteStreamCallback (CFWriteStreamRef stream, CFStreamEventType ty
 {
 	if (!dispatch_get_specific(IsOnSocketQueueOrTargetQueueKey))
 	{
-		LogWarn(@"%@ - Method only available from within the context of a performBlock: invocation", THIS_METHOD);
+		NSLog(@"%@ - Method only available from within the context of a performBlock: invocation", THIS_METHOD);
 		return SOCKET_NULL;
 	}
 	
@@ -8159,7 +8159,7 @@ static void CFWriteStreamCallback (CFWriteStreamRef stream, CFStreamEventType ty
 {
 	if (!dispatch_get_specific(IsOnSocketQueueOrTargetQueueKey))
 	{
-		LogWarn(@"%@ - Method only available from within the context of a performBlock: invocation", THIS_METHOD);
+		NSLog(@"%@ - Method only available from within the context of a performBlock: invocation", THIS_METHOD);
 		return NULL;
 	}
 	
@@ -8176,7 +8176,7 @@ static void CFWriteStreamCallback (CFWriteStreamRef stream, CFStreamEventType ty
 {
 	if (!dispatch_get_specific(IsOnSocketQueueOrTargetQueueKey))
 	{
-		LogWarn(@"%@ - Method only available from within the context of a performBlock: invocation", THIS_METHOD);
+		NSLog(@"%@ - Method only available from within the context of a performBlock: invocation", THIS_METHOD);
 		return NULL;
 	}
 	
@@ -8196,7 +8196,7 @@ static void CFWriteStreamCallback (CFWriteStreamRef stream, CFStreamEventType ty
 	
 	BOOL r1, r2;
 	
-	LogVerbose(@"Enabling backgrouding on socket");
+	NSLog(@"Enabling backgrouding on socket");
 	
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -8229,7 +8229,7 @@ static void CFWriteStreamCallback (CFWriteStreamRef stream, CFStreamEventType ty
 	
 	if (!dispatch_get_specific(IsOnSocketQueueOrTargetQueueKey))
 	{
-		LogWarn(@"%@ - Method only available from within the context of a performBlock: invocation", THIS_METHOD);
+		NSLog(@"%@ - Method only available from within the context of a performBlock: invocation", THIS_METHOD);
 		return NO;
 	}
 	
@@ -8246,7 +8246,7 @@ static void CFWriteStreamCallback (CFWriteStreamRef stream, CFStreamEventType ty
 	
 	if (!dispatch_get_specific(IsOnSocketQueueOrTargetQueueKey))
 	{
-		LogWarn(@"%@ - Method only available from within the context of a performBlock: invocation", THIS_METHOD);
+		NSLog(@"%@ - Method only available from within the context of a performBlock: invocation", THIS_METHOD);
 		return NO;
 	}
 	
@@ -8259,7 +8259,7 @@ static void CFWriteStreamCallback (CFWriteStreamRef stream, CFStreamEventType ty
 {
 	if (!dispatch_get_specific(IsOnSocketQueueOrTargetQueueKey))
 	{
-		LogWarn(@"%@ - Method only available from within the context of a performBlock: invocation", THIS_METHOD);
+		NSLog(@"%@ - Method only available from within the context of a performBlock: invocation", THIS_METHOD);
 		return NULL;
 	}
 	
